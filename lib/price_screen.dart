@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
 import 'package:flutter/cupertino.dart';
+import 'dart:io' show Platform;
+
 class PriceScreen extends StatefulWidget {
   @override
   _PriceScreenState createState() => _PriceScreenState();
@@ -8,23 +10,57 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedProperty = 'USD';
- List<DropdownMenuItem> getDropdownItems(){
-    List <DropdownMenuItem> dropdownitems =[];
-    for(String currency in currenciesList){
 
-      var newItem =DropdownMenuItem(child: Text(currency),value: currency,);
-    dropdownitems.add(newItem);
+
+  DropdownButton<dynamic> androidDropdownButton() {
+    List<DropdownMenuItem> dropdownitems = [];
+    for (String currency in currenciesList) {
+      var newItem = DropdownMenuItem(
+        child: Text(currency),
+        value: currency,
+      );
+      dropdownitems.add(newItem);
     }
-    return dropdownitems;
+
+    return DropdownButton<dynamic>(
+      value: selectedProperty,
+      items: dropdownitems,
+      onChanged: (value) {
+        setState(() {
+          selectedProperty = value!;
+        });
+      },
+    );
   }
-List<Widget> getPickerItems(){
-   List<Widget> texts =[];
-   for(int i =0; i<currenciesList.length;i++){
-     texts.add(Text(currenciesList[i]));
-     print(currenciesList[i]);
-   }
-   return texts;
+
+  CupertinoPicker iosPicker(){
+    List<Widget> texts = [];
+    for (int i = 0; i < currenciesList.length; i++) {
+      texts.add(Text(currenciesList[i]));
+      print(currenciesList[i]);
+    }
+
+
+  return  CupertinoPicker(
+      itemExtent: 32.0,
+      backgroundColor: Colors.lightBlue,
+      onSelectedItemChanged: (selectedIndex) {
+        print(selectedIndex);
+      },
+      children: texts,
+    );
   }
+  dynamic getPicker(){
+    if(Platform.isIOS){
+      print('its ios');
+      return iosPicker();
+    }
+   else if(Platform.isAndroid){
+     print('android');
+      return androidDropdownButton();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,26 +97,10 @@ List<Widget> getPickerItems(){
             alignment: Alignment.center,
             padding: EdgeInsets.only(bottom: 30.0),
             color: Colors.lightBlue,
-
-            child: CupertinoPicker(itemExtent: 32.0,backgroundColor: Colors.lightBlue,onSelectedItemChanged: (selectedIndex){
-              print(selectedIndex);
-
-
-            },children:getPickerItems(),)
+            child: getPicker(),
           ),
         ],
       ),
     );
   }
 }
-// DropdownButton<dynamic>(
-// value: selectedProperty,
-// items:getDropdownItems()
-// ,
-// onChanged:(value){
-// setState(() {
-// selectedProperty = value!;
-// });
-//
-// },
-// ),
