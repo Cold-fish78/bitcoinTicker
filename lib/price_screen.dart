@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'coin_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
+import 'package:http/http.dart' as http;
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -10,6 +13,34 @@ class PriceScreen extends StatefulWidget {
 
 class _PriceScreenState extends State<PriceScreen> {
   String selectedProperty = 'USD';
+ String currentValue ='?';
+
+
+
+  Future getData(String value) async {
+    // 5292524fa54041cfe87a5e3130eba1b4  api key
+    var realUrl = Uri.parse('https://rest.coinapi.io/v1/exchangerate/BTC/$value?apikey=778C318B-9D9D-4B37-B008-52D9E28C527C');
+    http.Response response = await http.get(realUrl);
+    if(response.statusCode ==200){
+      var decodedData =await jsonDecode(response.body);
+      print(decodedData);
+      print(decodedData['rate']);
+      var val = decodedData['rate'];
+
+
+      setState(()  {
+        selectedProperty = value;
+        currentValue=  val.toStringAsFixed(3);
+
+
+
+      });
+
+    } else{
+      print(response.statusCode);
+    }
+
+  }
 
 
   DropdownButton<dynamic> androidDropdownButton() {
@@ -25,10 +56,8 @@ class _PriceScreenState extends State<PriceScreen> {
     return DropdownButton<dynamic>(
       value: selectedProperty,
       items: dropdownitems,
-      onChanged: (value) {
-        setState(() {
-          selectedProperty = value!;
-        });
+      onChanged: (value) async {
+        await getData( value);
       },
     );
   }
@@ -72,7 +101,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = ? USD',
+                  '1 BTC =$currentValue $selectedProperty ',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
